@@ -11,21 +11,21 @@ private:
     ll  total_tranx;
     ll  total_item;
     ll  support;
-    map<ll , set<set<ll > >  > freq_itemset;
+    unordered_map<ll , set<set<ll >> > freq_itemset;
 public:
-    /* Methods public*/
+    /* Methods public*/ 
     aprori(string input , string output , ll  support_per)
     {
         this->input_file = input;
         this->output_file = output;
         this->support_per = support_per;
-        this->total_tranx = 0;
+        this->total_tranx = 0;  
         this->total_item = 0;
     }
-
+    
     void print_tranx()
     {
-        ifstream file(this->input_file.c_str());
+        ifstream file(this->input_file);
         if(file.is_open())
         {
             string trx;
@@ -36,10 +36,10 @@ public:
     }
 
     /*candidate set generation*/
-    set<set<ll > >  candidate_gen(set<set<ll > >  &Fk_1){
-        set<set<ll > >  Ck;
-        for(set<set<ll > >::iterator it = Fk_1.begin(); it != Fk_1.end(); it++){
-            set<set<ll > >::iterator jt = it;
+    set<set<ll >> candidate_gen(set<set<ll >> &Fk_1){
+        set<set<ll >> Ck;
+        for(auto it = Fk_1.begin(); it != Fk_1.end(); it++){
+            auto jt = it;
             jt++;
             for(; jt != Fk_1.end(); jt++)
             {
@@ -56,7 +56,7 @@ public:
                     temp.insert(large);
                     /* pruning the non freq itemset by subset checking*/
                     bool isbreak = false;
-                    for(set<ll > ::iterator r = temp.begin(); r != temp.end(); r++)
+                    for(auto r = temp.begin(); r != temp.end(); r++)
                     {
                         ll  element = *r;
                         temp.erase(element);
@@ -72,7 +72,7 @@ public:
                 }
                 else
                 {
-                    /* as items are sorted in set once k-1 elements
+                    /* as items are sorted in set once k-1 elements 
                     are different no point of checking further */
                     break;
                 }
@@ -82,19 +82,19 @@ public:
    }
     void print(set< set<ll > > &Fk)
     {
-        for(set<ll > i: Fk){
-            for(int j: i){
+        for(auto &i: Fk){
+            for(auto j: i){
                 cout<<j<<" ";
             }
             cout<<endl;
         }
         cout<<endl;
     }
-   void frequent_gen(set<set<ll > >  &Ck)
+   void frequent_gen(set<set<ll >> &Ck)
    {
-       vector<set<ll> >  temp{Ck.begin(), Ck.end()};
+       vector<set<ll>> temp{Ck.begin(), Ck.end()};
        map<ll, ll > mp;
-       ifstream file(this->input_file.c_str());
+       ifstream file(this->input_file);
        if(file.is_open())
        {
            string trx;
@@ -103,7 +103,7 @@ public:
                 stringstream itemstring(trx);
                 ll  item;
                 set<ll > transaction;
-                while(itemstring>> item)
+                while(itemstring>>item)
                 {
                     transaction.insert(item);
                 }
@@ -119,17 +119,17 @@ public:
        }
        file.close();
         set< set<ll > > Fk;
-        for(map<ll, ll>::iterator it = mp.begin() ; it != mp.end() ; it++)
+        for(auto it = mp.begin() ; it != mp.end() ; it++)
         {
             if(it->second >= this->support)
-            {
-                Fk.insert(temp[it->first]);
+            { 
+                Fk.insert(temp[it->first]); 
             }
-
+                
         }
         this->freq_itemset[Fk.begin()->size()] = Fk ;
-
-
+        
+       
 
    }
 
@@ -137,8 +137,8 @@ public:
     void init()
     {
         /* init stores freq of all single itemset from database*/
-        map<ll ,ll > mp; // itemset : freq
-        ifstream file(this->input_file.c_str());
+        map<set<ll >,ll > mp; // itemset : freq
+        ifstream file(this->input_file);
         if(file.is_open())
         {
             string trx;
@@ -146,35 +146,38 @@ public:
             {
                 stringstream itemstring(trx);
                 ll  item ;
-                while(itemstring>> item)
+                while(itemstring>>item)
                 {
-                        mp[item]++;
+                    if(mp.find({item})==mp.end())
+                        mp[{item}] = 1;
+                    else
+                        mp[{item}]++; 
                 }
                 this->total_tranx++;
             }
-
+            
         }
 
         file.close();
         this->total_item = mp.size();
         this->support = ceil(( (float)support_per * (float)total_tranx )/100);
-
+        
         set< set<ll > > Fk_one;
         for(auto it = mp.begin() ; it != mp.end() ; it++)
         {
             if(it->second >= this->support)
-                Fk_one.insert({it->first});
+                Fk_one.insert(it->first); 
         }
         this->freq_itemset[1] = Fk_one ;
-
+        
 
         // /* test and comment-out */
-        // cout<<"TEST N COMMENT \n";
-        cout<<"total tranx " << this->total_tranx << endl;
-        cout<<"total distinct items " << this->total_item << endl;
-        cout<<"suppport " << this->support << endl;
+        // cout << "TEST N COMMENT \n";
+        cout << "total tranx " << this->total_tranx << endl;
+        cout << "total distinct items " << this->total_item << endl;
+        cout << "suppport " << this->support << endl;
 
-
+        
     }
 
     void mine()
@@ -182,7 +185,7 @@ public:
         init();
         ll  k = 1;
         cout<<k<<" freq itemset size "<< this->freq_itemset[1].size() <<endl;
-
+        
         while(this->freq_itemset[k].size() != 0)
         {
             set< set<ll > > Ck_new = candidate_gen(this->freq_itemset[k]);
@@ -191,7 +194,7 @@ public:
             // cout<<k<<" Candidate size "<< Ck_new.size() << endl;
             cout<<k<<" freq itemset size "<< this->freq_itemset[k].size() <<endl;
             // print(this->freq_itemset[k]);
-
+            
         }
     }
 
