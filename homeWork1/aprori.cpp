@@ -1,5 +1,7 @@
 #include<bits/stdc++.h>
 using namespace std;
+using namespace std::chrono; 
+typedef seconds timematric;
 typedef long long int  ll;
 class aprori
 {
@@ -36,8 +38,7 @@ public:
     }
 
     /*candidate set generation*/
-    set<set<ll > >  candidate_gen(set<set<ll > >  &Fk_1){
-        set<set<ll > >  Ck;
+    void  candidate_gen(set<set<ll > >  &Fk_1, set<set<ll> > &Ck){
         for(set<set<ll > >::iterator it = Fk_1.begin(); it != Fk_1.end(); it++){
             set<set<ll > >::iterator jt = it;
             jt++;
@@ -78,7 +79,6 @@ public:
                 }
             }
         }
-        return Ck;
    }
     void print(set< set<ll > > &Fk)
     {
@@ -185,8 +185,17 @@ public:
 
         while(this->freq_itemset[k].size() != 0)
         {
-            set< set<ll > > Ck_new = candidate_gen(this->freq_itemset[k]);
+            set< set<ll > > Ck_new;
+            auto start = high_resolution_clock::now(); 
+            candidate_gen(this->freq_itemset[k], Ck_new);
+            auto stop = high_resolution_clock::now();
+            auto duration = duration_cast<timematric>(stop - start); 
+            cout << "Time taken by function candidate_gen: "<< duration.count() << " sec" << endl; 
+            start = high_resolution_clock::now(); 
             frequent_gen(Ck_new);
+            stop = high_resolution_clock::now();
+            duration = duration_cast<timematric>(stop - start); 
+            cout << "Time taken by function frequent_gen: "<< duration.count() << " sec" << endl; 
             k++;
             // cout<<k<<" Candidate size "<< Ck_new.size() << endl;
             cout<<k<<" freq itemset size "<< this->freq_itemset[k].size() <<endl;
