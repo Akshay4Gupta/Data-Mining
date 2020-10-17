@@ -1,8 +1,9 @@
 #include<bits/stdc++.h>
 using namespace std;
-using namespace std::chrono; 
+using namespace std::chrono;
 typedef seconds timematric;
-typedef long long int  ll;
+// typedef long long int  ll;
+typedef int ll;
 class aprori
 {
 private:
@@ -14,16 +15,6 @@ private:
     ll  total_item;
     ll  support;
     map<ll , set<set<ll > >  > freq_itemset;
-public:
-    /* Methods public*/
-    aprori(string input , string output , ll  support_per)
-    {
-        this->input_file = input;
-        this->output_file = output;
-        this->support_per = support_per;
-        this->total_tranx = 0;
-        this->total_item = 0;
-    }
 
     void print_tranx()
     {
@@ -128,10 +119,7 @@ public:
 
         }
         this->freq_itemset[Fk.begin()->size()] = Fk ;
-
-
-
-   }
+    }
 
 
     void init()
@@ -176,26 +164,43 @@ public:
 
 
     }
+public:
+    /* Methods public*/
+    aprori(string input , string output , ll  support_per)
+    {
+        this->input_file = input;
+        this->output_file = output;
+        this->support_per = support_per;
+        this->total_tranx = 0;
+        this->total_item = 0;
+    }
+
+    /* Returns all the frequent itemset generated */
+    map<ll , set<set<ll > >  > get_freq_itemset()
+    {
+        return this->freq_itemset;
+    }
 
     void mine()
     {
-        init();
+        init();  // Initalize the 1 freq itemset from database
+
         ll  k = 1;
         cout<<k<<" freq itemset size "<< this->freq_itemset[1].size() <<endl;
 
         while(this->freq_itemset[k].size() != 0)
         {
             set< set<ll > > Ck_new;
-            auto start = high_resolution_clock::now(); 
+            auto start = high_resolution_clock::now();
             candidate_gen(this->freq_itemset[k], Ck_new);
             auto stop = high_resolution_clock::now();
-            auto duration = duration_cast<timematric>(stop - start); 
-            cout << "Time taken by function candidate_gen: "<< duration.count() << " sec" << endl; 
-            start = high_resolution_clock::now(); 
+            auto duration = duration_cast<timematric>(stop - start);
+            cout << "Time taken by function candidate_gen: "<< duration.count() << " sec" << endl;
+            start = high_resolution_clock::now();
             frequent_gen(Ck_new);
             stop = high_resolution_clock::now();
-            duration = duration_cast<timematric>(stop - start); 
-            cout << "Time taken by function frequent_gen: "<< duration.count() << " sec" << endl; 
+            duration = duration_cast<timematric>(stop - start);
+            cout << "Time taken by function frequent_gen: "<< duration.count() << " sec" << endl;
             k++;
             // cout<<k<<" Candidate size "<< Ck_new.size() << endl;
             cout<<k<<" freq itemset size "<< this->freq_itemset[k].size() <<endl;
@@ -204,11 +209,34 @@ public:
         }
     }
 
+    void outputFrequent()
+    {
+        ofstream fout;
+        fout.open(this->output_file);
+        for(auto it: this->freq_itemset)
+        {
+            for(auto s : it.second) // set
+            {
+                vector<string> ans;
+                for(auto i : s) //set
+                {
+                    ans.push_back(to_string(i));
+                }
+                sort(ans.begin(), ans.end());
+                for(string i : ans)
+                    fout<< i << " ";
+                fout << endl;
+            }
+        }
+        fout.close();
+    }
+
 };
 
 
 int  main(int  argc, char **argv)
 {
-    aprori * obj = new aprori(argv[1],argv[2],stoi(argv[3]));
+    aprori * obj = new aprori(argv[1],argv[3],stoi(argv[2]));
     obj->mine();
+    obj->outputFrequent();
 }
